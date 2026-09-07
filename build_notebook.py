@@ -117,7 +117,9 @@ else:
     BATCH = int(os.environ.get("BATCH", "16"))
     FRACTION = float(os.environ.get("FRACTION", "1.0"))    # dataset complet
     EXP_NAME = os.environ.get("EXP_NAME", "yolo_gpu")
-    WORKERS = 8
+    # Colab gratuit : 2 vCPUs et ~12,7 Go de RAM. Plus de workers ne sert à
+    # rien et chaque processus forké duplique une partie de la RAM du parent.
+    WORKERS = 2
 
 DEVICE = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
 
@@ -243,7 +245,9 @@ On part des poids pré-entraînés COCO (`yolov8n.pt`) et on fine-tune sur Field
 - **imgsz** : résolution d'entrée (640 GPU / 320 CPU)
 - **epochs** : 60 GPU / 20 CPU, avec **early stopping** (patience 15)
 - **fraction** : 100 % du dataset (GPU) ou ~12 % (~500 images, CPU)
-- **cache** : images en RAM pour accélérer (ok avec 16 Go)
+- **cache** : désactivé — le cache RAM (~5 Go d'images décodées) fait planter
+  les sessions Colab gratuites (~12,7 Go de RAM). Option `cache="disk"` possible
+  si l'espace disque /content suffit (~6 Go de .npy).
 - **plots** : courbes d'apprentissage, matrice de confusion, courbes PR générées
   automatiquement dans `runs/detect/<exp>/`
 
@@ -275,7 +279,7 @@ else:
         batch=BATCH,
         patience=15,
         seed=42,
-        cache=True,
+        cache=False,   # NE PAS mettre True : 5 000 images en RAM => crash Colab (OOM)
         fraction=FRACTION,
         device=DEVICE,
         workers=WORKERS,
@@ -293,7 +297,12 @@ Métriques standard de détection (calculées par Ultralytics) :
 - **Précision / Rappel / F1** par classe
 - **Matrice de confusion** et **courbes Précision-Rappel** par classe"""))
 
-cells.append(nbf.v4.new_code_cell("""# Évaluation sur le split test
+cells.append(nbf.v4.new_code_cell("""# Libère la mémoire avant l'évaluation (le dataloader d'entraînement reste en RAM)
+import gc
+gc.collect()
+torch.cuda.empty_cache()
+
+# Évaluation sur le split test
 results = model.val(data=DATA_YAML, split="test", batch=BATCH, plots=True, device=DEVICE)
 
 m = results.box
