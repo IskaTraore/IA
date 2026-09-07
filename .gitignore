@@ -1,0 +1,24 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Ultralytics / entraînements
+runs/
+datasets/
+figures/
+*.pt
+*.onnx
+
+# URL signée du dataset (export Roboflow)
+download_url.txt
+
+# Divers
+.DS_Store
