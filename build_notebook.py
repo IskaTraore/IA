@@ -113,13 +113,14 @@ else:
     # Config complète pour GPU (Colab)
     MODEL_NAME = os.environ.get("MODEL_NAME", "yolov8n.pt")
     IMGSZ = int(os.environ.get("IMGSZ", "640"))
-    EPOCHS = int(os.environ.get("EPOCHS", "60"))
+    EPOCHS = int(os.environ.get("EPOCHS", "30"))
     BATCH = int(os.environ.get("BATCH", "16"))
     FRACTION = float(os.environ.get("FRACTION", "1.0"))    # dataset complet
     EXP_NAME = os.environ.get("EXP_NAME", "yolo_gpu")
-    # Colab gratuit : 2 vCPUs et ~12,7 Go de RAM. Plus de workers ne sert à
-    # rien et chaque processus forké duplique une partie de la RAM du parent.
-    WORKERS = 2
+    # 4 workers de dataloader. NB : Colab gratuit ne fournit que 2 vCPUs —
+    # au-delà, chaque processus forké duplique une partie de la RAM du parent
+    # sans réellement accélérer le chargement des données.
+    WORKERS = 4
 
 DEVICE = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
 
@@ -243,7 +244,7 @@ cells.append(nbf.v4.new_markdown_cell("""## 5. Entraînement YOLOv8n (fine-tunin
 
 On part des poids pré-entraînés COCO (`yolov8n.pt`) et on fine-tune sur FieldPlant :
 - **imgsz** : résolution d'entrée (640 GPU / 320 CPU)
-- **epochs** : 60 GPU / 20 CPU, avec **early stopping** (patience 15)
+- **epochs** : 30 GPU / 20 CPU, avec **early stopping** (patience 15)
 - **fraction** : 100 % du dataset (GPU) ou ~12 % (~500 images, CPU)
 - **cache** : désactivé — le cache RAM (~5 Go d'images décodées) fait planter
   les sessions Colab gratuites (~12,7 Go de RAM). Option `cache="disk"` possible
@@ -422,7 +423,7 @@ cells.append(nbf.v4.new_markdown_cell("""## 9. Conclusion et pistes
 - Erreurs typiques : confusion entre maladies visuellement proches, symptômes minuscules…
 
 **Pistes d'amélioration :**
-- Entraînement complet sur GPU (Colab, ~60 époques, imgsz 640)
+- Entraînement complet sur GPU (Colab, ~30 époques, imgsz 640)
 - Comparaison YOLOv8n vs YOLOv8s (précision vs vitesse)
 - Augmentation ciblée pour les classes sous-représentées
 - Test en conditions réelles (photos smartphone, autres cultures)"""))

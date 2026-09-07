@@ -12,7 +12,7 @@ Fine-tuning de **YOLOv8n** pour localiser (bounding box) et classer **27 maladie
 
 ## 🚀 Entraîner le modèle sur Google Colab (recommandé)
 
-L'entraînement complet (60 époques, 640 px, 5 156 images) prend environ **1 heure sur le
+L'entraînement complet (30 époques, 640 px, 5 156 images) prend environ **30 minutes sur le
 GPU gratuit de Colab**, contre plusieurs jours sur un CPU local.
 
 ### Ouvrir le notebook dans Colab
